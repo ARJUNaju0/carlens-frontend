@@ -1,26 +1,91 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Blue-Black theme variables */
+  --bg-dark: #05080c;       /* page background */
+  --bg-elev: #0b1220;      /* elevated surfaces */
+  --foreground: #e6f3ff;   /* primary text (very light blue) */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --primary: #2ea0ff;      /* electric blue for links/buttons */
+  --primary-600: #1f8ae6;
+  --accent: #0ea5d8;       /* secondary cyan accent */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --muted: #8fa8c4;        /* muted text */
+  --glass-border: rgba(255,255,255,0.04);
 }
 
 body {
-  background: var(--background);
+  background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-elev) 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg,var(--primary),#0b6bb4); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { filter: brightness(1.05); }
+
+/* Surface / Card */
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.card:hover { transform: translateY(-6px); box-shadow: 0 18px 48px rgba(2,6,23,0.6); }
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(90deg,var(--primary),var(--primary-600));
+  color: #021026;
+  padding: .6rem 1.2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  display: inline-flex; align-items: center; gap: .5rem;
+}
+.btn-primary:active { transform: translateY(1px); }
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--foreground);
+  padding: .5rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* Banner / AI box */
+.ai-box { background: linear-gradient(135deg,#0b1220,#08121b); color: var(--foreground); border-radius: 18px; padding: 1rem; }
+
+.marketplace-badge { background: rgba(46,160,255,0.06); color: var(--primary); font-size: .72rem; padding: .25rem .6rem; border-radius: 9999px; }
+
+.navbar-blur { backdrop-filter: blur(10px); background: linear-gradient(180deg, rgba(11,18,30,0.6), rgba(11,18,30,0.35)); border-bottom: 1px solid rgba(255,255,255,0.02); }
+
+.hero-bg { position: relative; overflow: hidden; }
+.hero-bg::before { content: ""; position: absolute; inset: 0; background: radial-gradient(600px 300px at 10% 10%, rgba(46,160,255,0.06), transparent 20%); pointer-events: none; }
+
+.skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.04)); animation: pulse 1.6s infinite; }
+@keyframes pulse { 0%{opacity:.7}50%{opacity:1}100%{opacity:.7} }
+
+/* Headings & text color rules */
+h1,h2,h3,h4,h5,h6 { color: var(--primary); font-weight:700; }
+a, .nav-link, .text-primary { color: var(--primary); }
+a:hover, .nav-link:hover { color: var(--primary-600); }
+.text-muted { color: var(--muted); }
+
+/* Make existing light utility classes readable under dark theme */
+[class*="bg-white"], [class*="bg-gray-50"], [class*="bg-gray-100"] {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid var(--glass-border);
+  color: var(--foreground);
+}
+
+/* Map common text utilities to theme readable colors */
+.text-gray-900, .text-gray-800, .text-gray-950 { color: var(--foreground) !important; }
+.text-gray-700, .text-gray-600, .text-gray-500 { color: var(--muted) !important; }
+
+/* Utility classes for stronger contrast */
+.text-strong { color: var(--foreground) !important; text-shadow: 0 8px 28px rgba(2,6,23,0.6); }
+.surface-contrast { background: linear-gradient(180deg, rgba(4,10,20,0.7), rgba(6,14,28,0.55)); border: 1px solid var(--glass-border); color: var(--foreground); }
