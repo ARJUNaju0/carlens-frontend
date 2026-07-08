@@ -1,44 +1,108 @@
 import { create } from "zustand";
+import api from "@/lib/api";
 import { Car } from "@/types/Car";
 
 interface CompareStore {
     cars: Car[];
 
-    addCar: (car: Car) => void;
+    loadCars: (isLoggedIn: boolean) => Promise<void>;
 
-    removeCar: (carId: string) => void;
+    addCar: (
+        car: Car,
+        isLoggedIn: boolean
+    ) => Promise<void>;
 
-    clearCars: () => void;
+    removeCar: (
+        id: string,
+        isLoggedIn: boolean
+    ) => Promise<void>;
+
+    clearCars: (
+        isLoggedIn: boolean
+    ) => Promise<void>;
+
+    setCars: (cars: Car[]) => void;
 }
 
-export const useCompareStore =
-    create<CompareStore>((set) => ({
-        cars: [],
+export const useCompareStore = create<CompareStore>((set, get) => ({
+    cars: [],
 
-        addCar: (car) =>
-            set((state) => {
-                const exists = state.cars.some(
-                    (c) => c.id === car.id
-                );
+    loadCars: async (isLoggedIn) => {
+        if (!isLoggedIn) return;
 
-                if (exists) {
-                    return state;
-                }
+        try {
+            const response = await api.get("/cars/compare/");
 
-                return {
-                    cars: [
-                        ...state.cars,
-                        car,
-                    ].slice(0, 3),
-                };
-            }),
+            set({
+                cars: response.data.map(
+                    (item: any) => item.car
+                ),
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    },
 
-        removeCar: (carId) =>
+    addCar: async (car, isLoggedIn) => {
+        const cars = get().cars;
+
+        if (cars.find((c) => c.id === car.id)) return;
+
+        if (cars.length >= 3) return;
+
+        try {
+            if (isLoggedIn) {
+                await api.post("/cars/compare/add/", {
+                    car: car.id,
+                });
+            }
+
+            set({
+                cars: [...cars, car],
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    },
+
+    removeCar: async (id, isLoggedIn) => {
+        try {
+            if (isLoggedIn) {
+                await api.delete(`/cars/compare/${id}/`);
+            }
+
             set((state) => ({
                 cars: state.cars.filter(
-                    (car) => car.id !== carId
+                    (car) => car.id !== id
                 ),
-            })),
+            }));
+        } catch (error) {
+            console.error(error);
+        }
+    },
 
-        clearCars: () => set({ cars: [] }),
-    }));
+    clearCars: async (isLoggedIn) => {
+        try {
+            if (isLoggedIn) {
+                const cars = get().cars;
+
+                await Promise.all(
+                    cars.map((car) =>
+                        api.delete(`/cars/compare/${car.id}/`)
+                    )
+                );
+            }
+
+            set({
+                cars: [],
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    },
+
+    setCars: (cars) =>
+        set({
+            cars,
+        }),
+}));

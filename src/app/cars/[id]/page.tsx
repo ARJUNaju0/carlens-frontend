@@ -1,15 +1,71 @@
+"use-client";
+
 import api from "@/lib/api";
 import { Car } from "@/types/Car";
 import FavoriteButton from "@/components/cars/FavoriteButton";
 import CompareButton from "@/components/cars/CompareButton";
 import ImageGallery from "@/components/cars/ImageGallery";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+
 
 
 async function getCar(id: string): Promise<Car> {
-    const response = await api.get(`/cars/${id}/`);
-    return response.data;
+    try {
+        const response = await api.get(`/cars/${id}/`);
+        return response.data;
+    } catch (error: any) {
+        const status = error.response?.status;
+
+        switch (status) {
+            case 400:
+                throw new Error("Invalid request.");
+
+            case 401:
+                throw new Error("Please login to continue.");
+
+            case 402:
+                throw new Error("Payment required.");
+
+            case 403:
+                throw new Error("You don't have permission to view this car.");
+
+            case 404:
+                notFound();
+
+            case 405:
+                throw new Error("Method not allowed.");
+
+            case 408:
+                throw new Error("Request timeout.");
+
+            case 409:
+                throw new Error("Conflict occurred.");
+
+            case 422:
+                throw new Error("Invalid data.");
+
+            case 429:
+                throw new Error("Too many requests. Please try again later.");
+
+            case 500:
+                throw new Error("Internal server error.");
+
+            case 502:
+                throw new Error("Bad gateway.");
+
+            case 503:
+                throw new Error("Service unavailable.");
+
+            case 504:
+                throw new Error("Gateway timeout.");
+
+            default:
+                throw new Error("Unexpected server error.");
+        }
+    }
 }
+
 
 export default async function CarDetailsPage({
     params,
@@ -44,87 +100,88 @@ export default async function CarDetailsPage({
     return (
         <main className="min-h-screen bg-gradient-to-b from-slate-900 via-neutral-900 to-black text-white">
 
-    <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="max-w-7xl mx-auto px-4 py-8">
 
-        {/* Top Section */}
+                {/* Top Section */}
 
-        <div className="grid lg:grid-cols-3 gap-8">
+                <div className="grid lg:grid-cols-3 gap-8">
 
-            {/* Gallery */}
+                    {/* Gallery */}
 
-            <div className="lg:col-span-2">
-                <ImageGallery images={car.images || []} />
-            </div>
-
-            {/* Right Card */}
-
-            <div>
-
-                <div className="bg-white/3 backdrop-blur-md rounded-3xl border border-cyan-800/30 p-6 sticky top-24 shadow-[0_20px_60px_rgba(2,6,23,0.6)]">
-
-                    <p className="text-sm text-cyan-200/70 tracking-wide uppercase font-medium">
-                        {car.marketplace}
-                    </p>
-
-                    <h1 className="text-3xl font-bold mt-2 text-cyan-100 drop-shadow-[0_0_14px_rgba(34,211,238,0.12)]">
-                        {car.title}
-                    </h1>
-
-                    <p className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-300 to-green-500 mt-4">
-                        ₹{Number(car.price).toLocaleString("en-IN")}
-                    </p>
-
-                    <div className="space-y-3 mt-6 text-slate-200">
-
-                        <Info
-                            label="Brand"
-                            value={car.brand}
-                        />
-
-                        <Info
-                            label="Model"
-                            value={car.model}
-                        />
-
-                        <Info
-                            label="Variant"
-                            value={car.variant}
-                        />
-
-                        <Info
-                            label="City"
-                            value={car.city}
-                        />
-
+                    <div className="lg:col-span-2">
+                        <ImageGallery images={car.images || []} />
                     </div>
 
-                    <div className="flex gap-3 mt-8 items-center">
+                    {/* Right Card */}
 
-                        <div className="flex gap-2 items-center">
-                            <FavoriteButton car={car} />
-                            <CompareButton car={car} />
+                    <div>
+
+                        <div className="bg-white/3 backdrop-blur-md rounded-3xl border border-cyan-800/30 p-6 sticky top-24 shadow-[0_20px_60px_rgba(2,6,23,0.6)]">
+
+                            <p className="text-sm text-cyan-200/70 tracking-wide uppercase font-medium">
+                                {car.marketplace}
+                            </p>
+
+                            <h1 className="text-3xl font-bold mt-2 text-cyan-100 drop-shadow-[0_0_14px_rgba(34,211,238,0.12)]">
+                                {car.title}
+                            </h1>
+
+                            <p className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-300 to-green-500 mt-4">
+                                ₹{Number(car.price).toLocaleString("en-IN")}
+                            </p>
+
+                            <div className="space-y-3 mt-6 text-slate-200">
+
+                                <Info
+                                    label="Brand"
+                                    value={car.brand}
+                                />
+
+                                <Info
+                                    label="Model"
+                                    value={car.model}
+                                />
+
+                                <Info
+                                    label="Variant"
+                                    value={car.variant}
+                                />
+
+                                <Info
+                                    label="City"
+                                    value={car.city}
+                                />
+
+                            </div>
+
+                            <div className="flex gap-3 mt-8 items-center">
+
+                                <div className="flex gap-2 items-center">
+                                    <FavoriteButton car={car} />
+                                    <CompareButton car={car} />
+                                </div>
+
+                                <Link
+                                    href={car.source_url}
+                                    target="_blank"
+                                    className="ml-auto inline-block px-4 py-2 rounded-xl bg-cyan-600/10 border border-cyan-600 text-cyan-300 hover:bg-cyan-600/20 transition"
+                                >
+                                    View Original Listing
+                                </Link>
+
+                            </div>
+
                         </div>
 
-                        <Link
-                            href={car.source_url}
-                            target="_blank"
-                            className="ml-auto inline-block px-4 py-2 rounded-xl bg-cyan-600/10 border border-cyan-600 text-cyan-300 hover:bg-cyan-600/20 transition"
-                        >
-                            View Original Listing
-                        </Link>
-
                     </div>
 
                 </div>
 
-            </div>
 
-        </div>
+                {/* Quick Specs */}
 
-        {/* Quick Specs */}
-
-        {hasQuickSpecs && (
-            <section className="
+                {hasQuickSpecs && (
+                    <section className="
                 bg-white
                 text-gray-800
                 border
@@ -133,47 +190,47 @@ export default async function CarDetailsPage({
                 mt-8
             ">
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
 
-                    <Spec
-                        label="Year"
-                        value={car.manufacture_year}
-                    />
+                            <Spec
+                                label="Year"
+                                value={car.manufacture_year}
+                            />
 
-                    <Spec
-                        label="KM Driven"
-                        value={car.kms_driven}
-                    />
+                            <Spec
+                                label="KM Driven"
+                                value={car.kms_driven}
+                            />
 
-                    <Spec
-                        label="Fuel"
-                        value={car.fuel_type}
-                    />
+                            <Spec
+                                label="Fuel"
+                                value={car.fuel_type}
+                            />
 
-                    <Spec
-                        label="Transmission"
-                        value={car.transmission}
-                    />
+                            <Spec
+                                label="Transmission"
+                                value={car.transmission}
+                            />
 
-                    <Spec
-                        label="Owner"
-                        value={car.owner_type}
-                    />
+                            <Spec
+                                label="Owner"
+                                value={car.owner_type}
+                            />
 
-                    <Spec
-                        label="Engine"
-                        value={car.engine_capacity}
-                    />
+                            <Spec
+                                label="Engine"
+                                value={car.engine_capacity}
+                            />
 
-                </div>
+                        </div>
 
-            </section>
-        )}
+                    </section>
+                )}
 
-        {/* Description */}
+                {/* Description */}
 
-        {hasDescription && (
-            <section className="
+                {hasDescription && (
+                    <section className="
                 bg-white
                 text-gray-800
                 border
@@ -182,21 +239,21 @@ export default async function CarDetailsPage({
                 mt-8
             ">
 
-                <h2 className="text-2xl font-bold mb-4">
-                    Description
-                </h2>
+                        <h2 className="text-2xl font-bold mb-4">
+                            Description
+                        </h2>
 
-                <p className="leading-8 text-gray-700">
-                    {car.description}
-                </p>
+                        <p className="leading-8 text-gray-700">
+                            {car.description}
+                        </p>
 
-            </section>
-        )}
+                    </section>
+                )}
 
-        {/* Features */}
+                {/* Features */}
 
-        {hasFeatures && (
-            <section className="
+                {hasFeatures && (
+                    <section className="
                 bg-white
                 text-gray-800
                 border
@@ -205,34 +262,34 @@ export default async function CarDetailsPage({
                 mt-8
             ">
 
-                <h2 className="text-2xl font-bold mb-6">
-                    Features
-                </h2>
+                        <h2 className="text-2xl font-bold mb-6">
+                            Features
+                        </h2>
 
-                <div className="grid md:grid-cols-3 gap-3">
+                        <div className="grid md:grid-cols-3 gap-3">
 
-                    {car.features?.map((feature) => (
-                        <div
-                            key={feature.id}
-                            className="
+                            {car.features?.map((feature) => (
+                                <div
+                                    key={feature.id}
+                                    className="
                                 bg-gray-50
                                 rounded-xl
                                 p-3
                             "
-                        >
-                            ✓ {feature.name}
+                                >
+                                    ✓ {feature.name}
+                                </div>
+                            ))}
+
                         </div>
-                    ))}
 
-                </div>
+                    </section>
+                )}
 
-            </section>
-        )}
+                {/* Specifications */}
 
-        {/* Specifications */}
-
-        {hasSpecifications && (
-            <section className="
+                {hasSpecifications && (
+                    <section className="
                 bg-white
                 text-gray-800
                 border
@@ -241,41 +298,41 @@ export default async function CarDetailsPage({
                 mt-8
             ">
 
-                <h2 className="text-2xl font-bold mb-6">
-                    Specifications
-                </h2>
+                        <h2 className="text-2xl font-bold mb-6">
+                            Specifications
+                        </h2>
 
-                <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid md:grid-cols-2 gap-4">
 
-                    {Object.entries(
-                        car.specifications?.data || {}
-                    ).map(([key, value]) => (
-                        <div
-                            key={key}
-                            className="
+                            {Object.entries(
+                                car.specifications?.data || {}
+                            ).map(([key, value]) => (
+                                <div
+                                    key={key}
+                                    className="
                                 flex
                                 justify-between
                                 border-b
                                 pb-2
                             "
-                        >
-                            <span>{key}</span>
+                                >
+                                    <span>{key}</span>
 
-                            <span>
-                                {String(value)}
-                            </span>
+                                    <span>
+                                        {String(value)}
+                                    </span>
+                                </div>
+                            ))}
+
                         </div>
-                    ))}
 
-                </div>
+                    </section>
+                )}
 
-            </section>
-        )}
+                {/* Service History */}
 
-        {/* Service History */}
-
-        {car.service_history && (
-            <section className="
+                {car.service_history && (
+                    <section className="
                 bg-white
                 text-gray-800
                 border
@@ -284,38 +341,38 @@ export default async function CarDetailsPage({
                 mt-8
             ">
 
-                <h2 className="text-2xl font-bold mb-6">
-                    Service History
-                </h2>
+                        <h2 className="text-2xl font-bold mb-6">
+                            Service History
+                        </h2>
 
-                <div className="space-y-3">
+                        <div className="space-y-3">
 
-                    <p>
-                        Last Service:
-                        {" "}
-                        {car.service_history.last_service_date}
-                    </p>
+                            <p>
+                                Last Service:
+                                {" "}
+                                {car.service_history.last_service_date}
+                            </p>
 
-                    <p>
-                        Authorized:
-                        {" "}
-                        {car.service_history.authorized_service
-                            ? "Yes"
-                            : "No"}
-                    </p>
+                            <p>
+                                Authorized:
+                                {" "}
+                                {car.service_history.authorized_service
+                                    ? "Yes"
+                                    : "No"}
+                            </p>
 
-                    <p>
-                        {car.service_history.notes}
-                    </p>
+                            <p>
+                                {car.service_history.notes}
+                            </p>
 
-                </div>
+                        </div>
 
-            </section>
-        )}
+                    </section>
+                )}
 
-    </div>
+            </div>
 
-</main>
+        </main>
     );
 }
 
@@ -339,13 +396,15 @@ function Spec({
     );
 }
 
-function Info({
-    label,
-    value,
-}: {
-    label: string;
-    value: any;
-}) {
+function Info(
+    {
+        label,
+        value,
+    }:
+        {
+            label: string;
+            value: any;
+        }) {
     return (
         <div className="flex justify-between">
             <span className="text-gray-500">

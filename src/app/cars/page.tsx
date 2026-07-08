@@ -7,6 +7,7 @@ import { Car } from "@/types/Car";
 
 import CarCard from "@/components/cars/CarCard";
 import SearchFilters from "@/components/cars/SearchFilters";
+import { notFound } from "next/navigation";
 
 interface CarFilters {
     query: string;
@@ -33,37 +34,35 @@ export default function CarsPage() {
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState<CarFilters>(initialFilters);
 
-    useEffect(() => {
-        fetchCars();
-    }, []);
-
-    async function fetchCars() {
+    async function handleSearch(searchQuery = filters.query) {
+        setLoading(true);
         try {
-            const token =
-                localStorage.getItem(
-                    "access"
+            const token = localStorage.getItem("access");
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            if (searchQuery.trim()) {
+                const response = await api.post(
+                    "/ai/search/",
+                    { query: searchQuery },
+                    { headers }
                 );
-
-            const response =
-                await api.get(
+                setCars(response.data);
+            } else {
+                const response = await api.get(
                     "/cars/",
-                    token
-                        ? {
-                            headers: {
-                                Authorization:
-                                    `Bearer ${token}`,
-                              },
-                          }
-                        : {}
+                    { headers }
                 );
-
-            setCars(response.data);
+                setCars(response.data);
+            }
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
         }
     }
+
+    useEffect(() => {
+        handleSearch("");
+    }, []);
 
     const filteredCars = useMemo(() => {
         const query = filters.query.trim().toLowerCase();
@@ -122,12 +121,17 @@ export default function CarsPage() {
         });
     }, [cars, filters]);
 
+
+
     if (loading) {
         return (
             <div className="p-20 text-center text-muted">
                 Loading Cars...
             </div>
         );
+        if (!cars) {
+            notFound();
+        }
     }
 
     return (
@@ -148,18 +152,24 @@ export default function CarsPage() {
                             <input
                                 value={filters.query}
                                 onChange={(e) => setFilters({ ...filters, query: e.target.value })}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        handleSearch();
+                                    }
+                                }}
                                 placeholder="Search by brand, model, fuel type or city"
                                 className="flex-1 min-w-0 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-950 outline-none shadow-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
                             />
                             <button
                                 type="button"
+                                onClick={() => handleSearch()}
                                 className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
                             >
                                 Search
                             </button>
                         </div>
                         <p className="mt-2 text-sm text-slate-200">
-                            
+
                         </p>
                     </div>
                 </div>
