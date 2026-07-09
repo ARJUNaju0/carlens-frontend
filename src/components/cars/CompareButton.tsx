@@ -47,7 +47,7 @@ export default function CompareButton({
                         `/cars/compare/${car.id}/`
                     );
 
-                    removeCar(car.id);
+                    removeCar(car.id, isLoggedIn);
 
                 } else {
 
@@ -58,7 +58,7 @@ export default function CompareButton({
                         }
                     );
 
-                    addCar(car);
+                    addCar(car, isLoggedIn);
                 }
 
                 return;
@@ -66,9 +66,9 @@ export default function CompareButton({
 
             // Guest user
             if (exists) {
-                removeCar(car.id);
+                removeCar(car.id, isLoggedIn);
             } else {
-                addCar(car);
+                addCar(car, isLoggedIn);
             }
 
         } catch (error: any) {

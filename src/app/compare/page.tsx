@@ -199,16 +199,11 @@ export default function ComparePage() {
                 </div>
 
                 <button
-
-                    onClick={clearCars}
-
-                    className="bg-red-600 text-white px-5 py-2 rounded-xl"
-
-                >
-
+                    onClick={() => clearCars(isLoggedIn)}
+                    className="bg-red-600 text-white px-5 py-2 rounded-xl">
                     Clear All
-
                 </button>
+
 
             </div>
 
